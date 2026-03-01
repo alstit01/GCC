@@ -1,178 +1,213 @@
 # GCC – Git Context Controller
 
-A structured context management framework for Claude, inspired by Git version control.
-Claude manages its reasoning memory through COMMIT, BRANCH, MERGE, and CONTEXT operations —
-so it never "forgets" what it has done, even across multiple sessions.
+A context memory framework for AI agents, inspired by Git version control.
+Agents manage reasoning memory through COMMIT, BRANCH, MERGE, and CONTEXT operations —
+so nothing is lost between sessions.
 
 ---
 
 ## What is GCC?
 
-Normally, Claude loses all context when a conversation ends. GCC solves this by storing
-Claude's memory in a `.GCC/` folder that is tracked by Git. At the start of every session,
-Claude reads this folder and knows exactly where it left off.
+AI agents lose all context when a session ends. GCC solves this by storing
+agent memory in a `.GCC/` folder tracked by Git. At the start of every session,
+the agent reads this folder and knows exactly where it left off.
 
-Think of it like Git for Claude's brain: every milestone is a commit, every experiment
-is a branch, and the full history is always recoverable.
-
----
-
-## Quickstart: Using GCC in a new project
-
-### Step 1 – Prerequisites
-
-You need:
-- **Git** installed → [Download here](https://git-scm.com/downloads)
-- **A terminal** (on Windows: use **Git Bash**, which is installed with Git)
-- **Claude** (this framework works with Claude in any coding environment)
-
-To check if Git is installed, open a terminal and run:
-```bash
-git --version
-```
-You should see something like `git version 2.40.0`. If not, install Git first.
+Think of it like Git for agent memory: every milestone is a commit, every
+experiment is a branch, and the full history is always recoverable.
 
 ---
 
-### Step 2 – Set up a new project
+## Quickstart (humans)
 
-Open your terminal (Git Bash on Windows), navigate to the folder where you want your project, and run:
+### Prerequisites
+
+- **Git** → [git-scm.com/downloads](https://git-scm.com/downloads)
+- **A terminal** — on Windows use **Git Bash** (installed with Git)
+
+### Setup (2 steps)
+
+**Step 1: Clone GCC**
 
 ```bash
-# Create a new folder for your project
-mkdir my-project
-cd my-project
-
-# Initialize a Git repository
-git init -b main
-git config user.email "your@email.com"
-git config user.name "Your Name"
-
-# Make an initial commit so Git has something to work with
-git commit --allow-empty -m "initial"
+git clone https://github.com/alstit01/GCC.git
 ```
+
+**Step 2: Run setup in your project**
+
+```bash
+bash GCC/setup.sh /path/to/my-project "My Project Name" "What I want to build"
+```
+
+Or run without arguments for the interactive wizard:
+
+```bash
+bash GCC/setup.sh
+```
+
+That's it. GCC is ready. Your agent will find it automatically.
 
 ---
 
-### Step 3 – Copy the GCC scripts into your project
+## Agent Compatibility
 
-Copy the `scripts/` folder from this repository into your project root:
+`setup.sh` automatically creates instruction files for all major agents.
+No manual configuration needed — your agent finds GCC automatically.
 
-```bash
-# Either clone this repo and copy:
-cp -r /path/to/GCC/scripts ./scripts
-
-# Or on Windows in Git Bash:
-cp -r C:/Users/YourName/Documents/GitHub/GCC/scripts ./scripts
-```
-
-Your project folder should now look like this:
-```
-my-project/
-├── scripts/
-│   ├── gcc-init.sh
-│   ├── gcc-context.sh
-│   ├── gcc-commit.sh
-│   ├── gcc-branch.sh
-│   └── gcc-merge.sh
-```
+| Agent | Instruction file created |
+|---|---|
+| Claude (Anthropic) | `CLAUDE.md` |
+| OpenAI Codex | `AGENTS.md` |
+| Cursor | `.cursor/rules` |
+| Windsurf | `.windsurfrules` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Gemini CLI (Google) | `.gemini/GEMINI.md` |
+| Google Antigravity | `.agent/rules/gcc.md` |
 
 ---
 
-### Step 4 – Initialize GCC
+## For LLM Agents: Self-Setup Instructions
 
-```bash
-bash scripts/gcc-init.sh "My Project Name" "What I want to achieve with this project"
-```
+> **This section is for AI agents reading this file.**
+> If you are an LLM agent and GCC is not yet set up in your project, follow these steps to set it up yourself.
 
-Example:
-```bash
-bash scripts/gcc-init.sh "Online Shop" "Build a simple webshop with product listings and a cart"
-```
+### Step 1 — Check if GCC is already initialized
 
-This creates a `.GCC/` folder with Claude's memory structure and makes the first Git commit automatically.
-
----
-
-### Step 5 – Add CLAUDE.md
-
-Copy the `CLAUDE.md` file from this repository into your project root:
-
-```bash
-cp /path/to/GCC/CLAUDE.md ./CLAUDE.md
-```
-
-This file tells Claude how to use GCC. Without it, Claude won't know to use the memory system.
-
----
-
-### Step 6 – Start working with Claude
-
-Open Claude (e.g. in Claude.ai, Cursor, or any other Claude-powered editor) and point it to your project folder.
-
-**At the start of every session**, Claude will automatically run:
 ```bash
 bash scripts/gcc-context.sh
 ```
-...and read the full project history before doing anything.
+
+If this succeeds, GCC is ready. Skip to **Step 4**.
+If it fails with "not initialized", continue to Step 2.
+
+### Step 2 — Check if the GCC scripts exist
+
+```bash
+ls scripts/gcc-init.sh 2>/dev/null && echo "scripts present" || echo "scripts missing"
+```
+
+If scripts are missing, the user must clone the GCC repository first:
+
+```
+Tell the user: "Please run: git clone https://github.com/alstit01/GCC.git and then run: bash GCC/setup.sh . \"<project-name>\" \"<project-goal>\""
+```
+
+### Step 3 — Run setup
+
+If scripts are present but `.GCC/` is not initialized yet:
+
+```bash
+# Option A: setup.sh is available (recommended — sets up everything at once)
+bash GCC/setup.sh . "<project-name>" "<project-goal>"
+
+# Option B: scripts/ is already in the project root
+bash scripts/gcc-init.sh "<project-name>" "<project-goal>"
+```
+
+### Step 4 — Load context at the start of every session
+
+```bash
+bash scripts/gcc-context.sh
+```
+
+This is **required** at the start of every session. It gives you the full
+project state — roadmap, active branch, recent milestones — before you touch anything.
+
+### Step 5 — Work, log, and commit
+
+During work:
+- Append OTA log entries to `.GCC/branches/<active-branch>/log.md`
+- After each meaningful unit of work: `bash scripts/gcc-commit.sh "<summary>" "<detail>"`
+- To explore an alternative: `bash scripts/gcc-branch.sh "<name>" "<purpose>"`
+- To merge a concluded branch: `bash scripts/gcc-merge.sh "<name>"`
+
+### OTA Log Format
+
+```
+[OTA 2026-03-01 10:00 UTC] Thought: Need to understand the auth module
+[OTA 2026-03-01 10:01 UTC] Action: Read src/auth.py
+[OTA 2026-03-01 10:02 UTC] Observation: Session-based auth, lines 42-67 handle login
+```
+
+### Decision Reference (agent quick-card)
+
+| Situation | Command |
+|---|---|
+| Start of session | `bash scripts/gcc-context.sh` |
+| Finished a unit of work | `bash scripts/gcc-commit.sh "<summary>" "<detail>"` |
+| Exploring an alternative | `bash scripts/gcc-branch.sh "<name>" "<purpose>"` |
+| Branch concluded | `echo "main" > .GCC/.current-branch && bash scripts/gcc-merge.sh "<name>"` |
+| Lost track of project goal | `bash scripts/gcc-context.sh` |
+| Mid-task memory entry | Append directly to `.GCC/branches/<branch>/log.md` |
+
+**Never** use `git commit` for `.GCC/` files directly — always go through the scripts.
+
+---
+
+## How it works (day-to-day)
+
+1. **Open a session** in your project with any supported agent
+2. **Agent reads `.GCC/`** and knows the full project history
+3. **Agent works** and logs steps to `log.md` automatically
+4. **Agent commits milestones** to `commit.md` and creates Git commits
+5. **Next session:** repeat from step 1 — no context is lost
 
 ---
 
 ## The four GCC commands
 
-You don't need to run these yourself — Claude does it automatically. But it's useful to understand what they do:
+The agent runs these automatically. You don't need to use them yourself.
 
-| Command | What it does | When Claude uses it |
-|---------|-------------|---------------------|
-| `gcc-init.sh` | Sets up GCC in a new project | Once, at project start |
-| `gcc-context.sh` | Reads the current memory state | At the start of every session |
-| `gcc-commit.sh` | Saves a milestone to memory | After finishing a meaningful unit of work |
-| `gcc-branch.sh` | Creates a memory branch for an experiment | When exploring an alternative approach |
-| `gcc-merge.sh` | Merges a branch back into the main memory | After an experiment is concluded |
+| Command | What it does |
+|---|---|
+| `gcc-context.sh` | Reads current memory state — run at start of every session |
+| `gcc-commit.sh` | Saves a milestone checkpoint |
+| `gcc-branch.sh` | Opens a memory branch for an experiment |
+| `gcc-merge.sh` | Merges branch results back into main memory |
 
 ---
 
-## Day-to-day workflow
+## The memory hierarchy
 
-Once GCC is set up, your workflow is simple:
+```
+.GCC/
+├── main.md                    ← Global roadmap, milestones, current focus
+├── .current-branch            ← Name of the active branch
+└── branches/<name>/
+    ├── commit.md              ← Append-only milestone summaries
+    ├── log.md                 ← Real-time OTA execution trace
+    └── metadata.yaml          ← Architecture, file structure, dependencies
+```
 
-1. **Open a new Claude session** in your project
-2. **Claude reads `.GCC/`** and knows everything that happened before
-3. **Claude works** and logs its steps to `log.md`
-4. **Claude commits** milestones to `commit.md` and creates Git commits automatically
-5. **Next session**: repeat from step 1 — no context is lost
+---
+
+## Advanced: add GCC to an existing project
+
+```bash
+# Works with existing git repos — setup.sh detects this automatically
+bash GCC/setup.sh /path/to/existing-project "Project Name" "Goal"
+```
 
 ---
 
 ## Troubleshooting
 
-**"No such file or directory" when running a script**
-→ Make sure you are in the project root folder (the one containing `scripts/`).
-
-**Scripts don't execute on Windows**
-→ Use **Git Bash** (not PowerShell or CMD). Right-click in your project folder → "Git Bash Here".
-
-**".GCC already initialized" error**
-→ GCC is already set up in this folder. Just run `bash scripts/gcc-context.sh` to see the current state.
-
-**Git says "not a git repository"**
-→ You forgot step 2. Run `git init -b main` first, then `gcc-init.sh` again.
+| Problem | Solution |
+|---|---|
+| `command not found: bats` | `brew install bats-core` (macOS) or `apt install bats` (Linux) |
+| `.GCC already initialized` | GCC is already set up — run `bash scripts/gcc-context.sh` |
+| `not a git repository` | `setup.sh` handles this automatically — just run it again |
+| Scripts don't run on Windows | Use **Git Bash**, not PowerShell or CMD |
 
 ---
 
-## Development setup (optional)
-
-If you want to run the automated tests:
+## Tests
 
 ```bash
-# macOS
-brew install bats-core
-
-# Linux
-apt install bats
-
-# Run all tests
+# Run the full test suite (requires bats-core)
 bats tests/
+
+# macOS: brew install bats-core
+# Linux: apt install bats
 ```
 
 ---
